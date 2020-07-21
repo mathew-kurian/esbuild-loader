@@ -4,14 +4,14 @@ const { ESBuildPlugin } = require('../src')
 
 const esbuildLoader = require.resolve('../src')
 
-test('simple', async () => {
+const exec = async (options, { outputFile }) => {
   const compiler = webpack({
     mode: 'development',
     devtool: false,
     entry: __dirname + '/fixture/index.js',
     output: {
       path: __dirname + '/fixture/dist',
-      filename: 'index.js',
+      filename: outputFile,
       libraryTarget: 'commonjs2',
     },
     resolve: {
@@ -22,61 +22,44 @@ test('simple', async () => {
         {
           test: /\.[jt]sx?$/,
           loader: esbuildLoader,
+          options: options || {},
         },
       ],
     },
     plugins: [new ESBuildPlugin()],
   })
+
   let assets
+
   compiler.hooks.done.tap('test', (stats) => {
     console.log(stats.toString('minimal'))
     assets = stats.compilation.assets
   })
+
   await promisify(compiler.run.bind(compiler))()
-  expect(Object.keys(assets)).toMatchInlineSnapshot(`
-      Array [
-        "index.js",
-      ]
-    `)
-  expect(assets['index.js'].source()).toMatchSnapshot()
+
+  expect(Object.keys(assets)).toMatchSnapshot()
+  expect(assets[outputFile].source()).toMatchSnapshot()
+}
+
+test('simple', async () => {
+  await exec(null, { outputFile: 'index.js' })
 })
 
 test('minified', async () => {
-  const compiler = webpack({
-    mode: 'development',
-    devtool: false,
-    entry: __dirname + '/fixture/index.js',
-    output: {
-      path: __dirname + '/fixture/dist',
-      filename: 'minify.js',
-      libraryTarget: 'commonjs2',
+  await exec(
+    {
+      minify: true,
     },
-    resolve: {
-      extensions: ['.js', '.tsx', '.ts', '.jsx', '.json'],
+    { outputFile: 'minify.js' }
+  )
+})
+
+test('sourceMap', async () => {
+  await exec(
+    {
+      sourceMap: true,
     },
-    module: {
-      rules: [
-        {
-          test: /\.[jt]sx?$/,
-          loader: esbuildLoader,
-          options: {
-            minify: true,
-          },
-        },
-      ],
-    },
-    plugins: [new ESBuildPlugin()],
-  })
-  let assets
-  compiler.hooks.done.tap('test', (stats) => {
-    console.log(stats.toString('minimal'))
-    assets = stats.compilation.assets
-  })
-  await promisify(compiler.run.bind(compiler))()
-  expect(Object.keys(assets)).toMatchInlineSnapshot(`
-    Array [
-      "minify.js",
-    ]
-  `)
-  expect(assets['minify.js'].source()).toMatchSnapshot()
+    { outputFile: 'sourceMap.js' }
+  )
 })
