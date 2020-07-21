@@ -1,13 +1,11 @@
-# esbuild-loader
+# fast-esbuild-loader
 
 [esbuild](https://github.com/evanw/esbuild) is by far one of the fastest TS/ESNext to ES6 compilers, so it makes sense to use it over Babel/TSC with webpack to take advantage of both worlds (Speed and the webpack ecosytem).
-
-You might also like [maho](https://github.com/egoist/maho), a React framework powered by esbuild.
 
 ## Install
 
 ```bash
-yarn add esbuild-loader --dev
+npm install --save-dev fast-esbuild-loader
 ```
 
 ## Usage
@@ -15,7 +13,7 @@ yarn add esbuild-loader --dev
 In `webpack.config.js`:
 
 ```js
-const { ESBuildPlugin } = require('esbuild-loader')
+const { ESBuildPlugin } = require('fast-esbuild-loader')
 
 module.exports = {
   module: {
@@ -28,7 +26,7 @@ module.exports = {
           target: 'es2015', // default, or 'es20XX', 'esnext'
           jsxFactory: 'React.createElement',
           jsxFragment: 'React.Fragment',
-          sourceMap: false // Enable sourcemap
+          sourceMap: false, // Enable sourcemap
         },
       },
     ],
@@ -39,4 +37,4 @@ module.exports = {
 
 ## License
 
-MIT &copy; [EGOIST (Kevin Titor)](https://github.com/sponsors/egoist)
+MIT &copy; [mathew-kurian (Mathew Kurian)](https://github.com/mathew-kurian)
